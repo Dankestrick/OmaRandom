@@ -20,8 +20,9 @@ Plugin id: `io.github.dankestrick.omarandom`
 - **Colors.** New wheels use your current Omarchy theme's colors, and switch
   when you change themes. Pick **Classic** for bright colors instead, or set any
   slice to its own color.
-- **Pictures.** Give any option a picture. It shows inside its slice, and
-  large when that option wins.
+- **Pictures.** Give any option a picture from your home folder, or one of
+  the Omarchy theme wallpapers with the **Wallpapers** button. It shows inside
+  its slice, and large when that option wins.
 - **One at a time.** Click a wheel and it grows into a large wheel. **Spin**
   (or click the wheel, or press Space) and the winner pops up over it.
   **Save** keeps that result and leaves the wheel open, so a streamer can keep
@@ -92,8 +93,8 @@ OmaRandom runs as a normal Omarchy plugin, with your user's permissions.
   (`file://`); anything else is ignored, so a picture can never make the shell
   fetch a URL. All text is shown as plain text.
 - **What it reads.** Its own save file, your theme's `colors.toml` (for the
-  slice colors), the folders you browse when picking a picture, and the
-  pictures you choose. The picture browser is part of OmaRandom, and it only
+  slice colors), the folders you browse when picking a picture (only your
+  home folder and the Omarchy theme wallpapers), and the pictures you choose. The picture browser is part of OmaRandom, and it only
   stores each picture's path.
 - **What it writes.** One file: `~/.local/share/omarandom/omarandom.json`,
   with your wheels and up to 500 results. It is saved with an atomic write. If

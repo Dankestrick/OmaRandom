@@ -17,9 +17,31 @@ Item {
   property color dim: Qt.darker(Color.foreground, 1.4)
   property string fontFamily: Style.font.family
 
-  readonly property string home: Quickshell.env("HOME") || "/"
+  readonly property string home: Quickshell.env("HOME") || "/home"
+  // Omarchy's theme folders; each has a backgrounds folder of wallpapers.
+  readonly property string wallpapers: (Quickshell.env("OMARCHY_PATH") || "/usr/share/omarchy") + "/themes"
   // Remembered for the session, so the next pick starts where the last ended.
   property string folderPath: home + "/Pictures"
+  readonly property bool inWallpapers: inside(folderPath, wallpapers)
+  readonly property bool canGoUp: folderPath !== home && folderPath !== wallpapers
+
+  // Browsing stays inside your home folder and the Omarchy wallpapers.
+  function inside(path, top) {
+    return path === top || path.indexOf(top + "/") === 0
+  }
+
+  function allowed(path) {
+    return path.indexOf("/..") < 0 && (inside(path, home) || inside(path, wallpapers))
+  }
+
+  // Where the browser is, in words: ~/Pictures, or Omarchy wallpapers / nord.
+  function placeText(path) {
+    if (inside(path, wallpapers)) {
+      var rest = path.substring(wallpapers.length).replace(/\/backgrounds$/, "")
+      return "Omarchy wallpapers" + rest.replace(/\//g, " / ")
+    }
+    return "~" + path.substring(home.length)
+  }
 
   signal picked(string url)
   signal canceled()
@@ -35,13 +57,24 @@ Item {
   }
 
   function go(path) {
-    folderPath = path.length > 1 && path.charAt(path.length - 1) === "/" ? path.substring(0, path.length - 1) : path
+    path = path.length > 1 && path.charAt(path.length - 1) === "/" ? path.substring(0, path.length - 1) : path
+    if (!allowed(path)) return
+    folderPath = path
     grid.positionViewAtBeginning()
   }
 
   function goUp() {
-    var i = folderPath.lastIndexOf("/")
-    go(i > 0 ? folderPath.substring(0, i) : "/")
+    if (!canGoUp) return
+    var up = folderPath.substring(0, folderPath.lastIndexOf("/"))
+    // A theme's wallpapers sit in <theme>/backgrounds; skip the theme folder.
+    if (up !== wallpapers && up.substring(0, up.lastIndexOf("/")) === wallpapers) up = wallpapers
+    go(up)
+  }
+
+  function openFolder(path) {
+    // Opening a theme goes straight to its wallpapers.
+    if (path.substring(0, path.lastIndexOf("/")) === wallpapers) go(path + "/backgrounds")
+    else go(path)
   }
 
   function handleKey(event) {
@@ -100,7 +133,7 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             iconText: "\u{F005D}"
             tooltipText: "Up a folder · Backspace"
-            enabled: root.folderPath !== "/"
+            enabled: root.canGoUp
             foreground: root.fg
             fontFamily: root.fontFamily
             onClicked: root.goUp()
@@ -121,6 +154,16 @@ Item {
             fontFamily: root.fontFamily
             onClicked: root.go(root.home)
           }
+          Button {
+            anchors.verticalCenter: parent.verticalCenter
+            text: "Wallpapers"
+            bordered: true
+            selected: root.inWallpapers
+            tooltipText: "Wallpapers from the Omarchy themes"
+            foreground: root.fg
+            fontFamily: root.fontFamily
+            onClicked: root.go(root.wallpapers)
+          }
         }
 
         Text {
@@ -131,7 +174,7 @@ Item {
           anchors.rightMargin: Style.space(14)
           anchors.verticalCenter: parent.verticalCenter
           elide: Text.ElideMiddle
-          text: root.folderPath
+          text: root.placeText(root.folderPath)
           color: root.dim
           font.family: root.fontFamily
           font.pixelSize: Style.font.bodySmall
@@ -252,7 +295,7 @@ Item {
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
             onClicked: {
-              if (tile.fileIsDir) root.go(tile.filePath)
+              if (tile.fileIsDir) root.openFolder(tile.filePath)
               else {
                 var url = String(tile.fileUrl)
                 if (Logic.isLocalImage(url)) root.picked(url)
