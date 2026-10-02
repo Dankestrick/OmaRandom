@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "io.github.dankestrick.omarandom",
+  "name": "OmaRandom",
+  "version": "0.1.0",
+  "author": "Dankestrick",
+  "license": "MIT",
+  "description": "Spin-the-wheel randomizer for Omarchy: up to six named wheels with colors and pictures, spin one or spin all, and reveal the results.",
+  "kinds": [
+    "bar-widget",
+    "panel"
+  ],
+  "entryPoints": {
+    "barWidget": "qml/BarWidget.qml",
+    "panel": "qml/Panel.qml"
+  },
+  "barWidget": {
+    "displayName": "OmaRandom",
+    "description": "Open the OmaRandom wheel spinner.",
+    "category": "Utilities",
+    "aliases": [
+      "random",
+      "wheel",
+      "spin",
+      "picker",
+      "decide"
+    ],
+    "allowMultiple": false,
+    "defaultSection": "right"
+  }
+}
