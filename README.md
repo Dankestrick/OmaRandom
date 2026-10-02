@@ -44,6 +44,13 @@ Plugin id: `io.github.dankestrick.omarandom`
 | --- | --- | --- |
 | ![A large wheel with the winner card](docs/screenshots/Spin.png) | ![The wheel editor with options, colors and pictures](docs/screenshots/Editor.png) | ![Results cards for the latest round](docs/screenshots/Results.png) |
 
+It follows your Omarchy theme. Here are the same wheels after switching to
+**Osaka Jade**: the backdrop, borders and theme-colored wheels all change with it.
+
+| Wheels | Spin | Results |
+| --- | --- | --- |
+| ![Wheels in the Osaka Jade theme](docs/screenshots/themes/OsakaJade-Wheels.png) | ![Spinning in the Osaka Jade theme](docs/screenshots/themes/OsakaJade-Spin.png) | ![Results in the Osaka Jade theme](docs/screenshots/themes/OsakaJade-Results.png) |
+
 ## Install
 
 You need [Omarchy](https://omarchy.org) 4. Nothing else.
