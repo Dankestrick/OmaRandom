@@ -358,26 +358,76 @@ Item {
         focus: true
       }
 
-      // Faint "OmaRandom" in the font of Omarchy's logo, in the theme's
+      // Faint "OmaRandom" in the font of Omarchy's logo, repeated in rows
+      // that run diagonally (top left to bottom right), in the theme's
       // accent color, behind everything.
-      Text {
+      Item {
         id: backdrop
-        textFormat: Text.PlainText
-        anchors.centerIn: parent
-        anchors.verticalCenterOffset: Style.space(30)
-        text: Logic.LOGO
-        color: Color.accent
-        opacity: 0.07
-        font.family: root.fontFamily
-        // Monospace glyphs are about 0.6 em wide; size the art to 90% of the window.
-        font.pixelSize: Math.max(6, Math.floor(parent.width * 0.9 / (Logic.LOGO.indexOf("\n") * 0.6)))
-        // Rows exactly one glyph tall, so the block characters touch.
-        lineHeightMode: Text.FixedHeight
-        lineHeight: backdropMetrics.height
+        anchors.fill: parent
+        clip: true
+
+        readonly property int artColumns: Logic.LOGO.indexOf("\n")
+        // Each copy is a bit under half the window wide.
+        readonly property int artPixelSize: Math.max(5, Math.round(width * 0.42 / (artColumns * 0.6)))
+        readonly property real diagonal: Math.sqrt(width * width + height * height)
+
+        Item {
+          id: tiles
+          width: backdrop.diagonal * 1.2
+          height: width
+          anchors.centerIn: parent
+          rotation: 45
+          opacity: 0.09
+          // Fade the whole pattern as one image, not each copy separately.
+          layer.enabled: true
+
+          Column {
+            id: tileRows
+            anchors.centerIn: parent
+            spacing: backdrop.artPixelSize * 14
+
+            Repeater {
+              model: Math.ceil(tiles.height / (backdrop.artPixelSize * 25)) + 1
+              delegate: Row {
+                required property int index
+                spacing: backdrop.artPixelSize * 18
+                // Every other row shifts half a copy, like bricks.
+                x: index % 2 ? -(backdropArt.width + spacing) / 2 : 0
+
+                Repeater {
+                  model: Math.ceil(tiles.width / (backdrop.width * 0.42)) + 2
+                  delegate: Text {
+                    textFormat: Text.PlainText
+                    text: Logic.LOGO
+                    color: Color.accent
+                    font.family: root.fontFamily
+                    font.pixelSize: backdrop.artPixelSize
+                    // Rows exactly one glyph tall, so the block characters touch.
+                    lineHeightMode: Text.FixedHeight
+                    lineHeight: backdropMetrics.height
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        // Measures one copy for the spacing math above.
+        Text {
+          id: backdropArt
+          visible: false
+          textFormat: Text.PlainText
+          text: Logic.LOGO
+          font.family: root.fontFamily
+          font.pixelSize: backdrop.artPixelSize
+          lineHeightMode: Text.FixedHeight
+          lineHeight: backdropMetrics.height
+        }
 
         FontMetrics {
           id: backdropMetrics
-          font: backdrop.font
+          font.family: root.fontFamily
+          font.pixelSize: backdrop.artPixelSize
         }
       }
 

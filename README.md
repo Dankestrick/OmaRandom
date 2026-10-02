@@ -36,7 +36,7 @@ Plugin id: `io.github.dankestrick.omarandom`
   history. **Clear history** deletes the history and keeps the top. With
   nothing saved yet, the tab says "Spin a wheel to generate results."
 - **Idle sway.** Resting wheels rock gently back and forth.
-- **Themed backdrop.** A faint "OmaRandom" sits behind everything, drawn in
+- **Themed backdrop.** Faint "OmaRandom" rows run diagonally behind everything, drawn in
   the same block-letter font as Omarchy's logo and in your theme's accent
   color, so it changes when you switch themes.
 
