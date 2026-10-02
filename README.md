@@ -75,7 +75,8 @@ Click the wheel icon on the bar to open or close OmaRandom.
 | Picture browser | Backspace / Esc | Up a folder / Cancel |
 
 Click a wheel's name under it to edit the wheel. Changes save as you type.
-The editor also has **Delete wheel**.
+The trash icon beside the name deletes the wheel after you confirm; the
+editor also has **Delete wheel**.
 
 From a terminal:
 

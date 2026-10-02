@@ -600,26 +600,45 @@ Item {
                   }
                 }
 
-                // The wheel's name doubles as its edit button.
-                Button {
+                // The wheel's name doubles as its edit button; the trash
+                // beside it deletes the wheel (after a confirm).
+                Row {
                   anchors.top: cardWheel.bottom
                   anchors.topMargin: Style.space(12)
                   anchors.horizontalCenter: parent.horizontalCenter
-                  width: Math.min(implicitWidth, card.width)
-                  text: card.modelData.name
-                  iconText: "\u{F03EB}"
-                  bordered: true
-                  enabled: root.spinAllPending === 0
-                  tooltipText: "Edit wheel"
-                  foreground: root.fg
-                  fontFamily: root.fontFamily
-                  fontSize: Style.font.title
-                  horizontalPadding: Style.space(16)
-                  verticalPadding: Style.space(7)
-                  onClicked: root.editWheel(card.modelData.id)
+                  spacing: Style.space(6)
+
+                  Button {
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: Math.min(implicitWidth, card.width - Style.space(40))
+                    text: card.modelData.name
+                    iconText: "\u{F03EB}"
+                    bordered: true
+                    enabled: root.spinAllPending === 0
+                    tooltipText: "Edit wheel"
+                    foreground: root.fg
+                    fontFamily: root.fontFamily
+                    fontSize: Style.font.title
+                    horizontalPadding: Style.space(16)
+                    verticalPadding: Style.space(7)
+                    onClicked: root.editWheel(card.modelData.id)
+                  }
+                  PanelActionButton {
+                    anchors.verticalCenter: parent.verticalCenter
+                    iconText: "\u{F01B4}"
+                    tooltipText: "Delete wheel"
+                    enabled: root.spinAllPending === 0
+                    foreground: root.fg
+                    fontFamily: root.fontFamily
+                    onClicked: {
+                      root.deleteId = card.modelData.id
+                      root.confirmMode = "delete"
+                    }
+                  }
                 }
               }
             }
+
             // Pops up in the middle when every wheel has landed.
             Item {
               id: roundDone
@@ -1112,7 +1131,7 @@ Item {
         opened: root.confirmMode !== ""
         message: root.confirmMode === "history"
           ? "Delete all " + root.split.history.length + " results in the history?"
-          : "Delete the wheel “" + (editor.draft ? editor.draft.name : "") + "”?"
+          : "Delete the wheel “" + (root.wheelById(root.deleteId) ? root.wheelById(root.deleteId).name : "") + "”?"
         confirmText: "Delete"
         fontFamily: root.fontFamily
         onCanceled: root.confirmMode = ""
