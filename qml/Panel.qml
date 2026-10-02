@@ -358,6 +358,29 @@ Item {
         focus: true
       }
 
+      // Faint "OmaRandom" in the font of Omarchy's logo, in the theme's
+      // accent color, behind everything.
+      Text {
+        id: backdrop
+        textFormat: Text.PlainText
+        anchors.centerIn: parent
+        anchors.verticalCenterOffset: Style.space(30)
+        text: Logic.LOGO
+        color: Color.accent
+        opacity: 0.07
+        font.family: root.fontFamily
+        // Monospace glyphs are about 0.6 em wide; size the art to 90% of the window.
+        font.pixelSize: Math.max(6, Math.floor(parent.width * 0.9 / (Logic.LOGO.indexOf("\n") * 0.6)))
+        // Rows exactly one glyph tall, so the block characters touch.
+        lineHeightMode: Text.FixedHeight
+        lineHeight: backdropMetrics.height
+
+        FontMetrics {
+          id: backdropMetrics
+          font: backdrop.font
+        }
+      }
+
       Item {
         id: page
         anchors.fill: parent

@@ -8,7 +8,7 @@ options, give the slices colors and pictures, then spin one wheel at a time or
 spin them all and reveal the results card by card. It follows your Omarchy
 theme, works offline, and runs no commands.
 
-![OmaRandom with three wheels](docs/screenshots/Wheels.png)
+![OmaRandom with Theme, Font and Bar position wheels](docs/screenshots/Wheels.png)
 
 Plugin id: `io.github.dankestrick.omarandom`
 
@@ -36,6 +36,9 @@ Plugin id: `io.github.dankestrick.omarandom`
   history. **Clear history** deletes the history and keeps the top. With
   nothing saved yet, the tab says "Spin a wheel to generate results."
 - **Idle sway.** Resting wheels rock gently back and forth.
+- **Themed backdrop.** A faint "OmaRandom" sits behind everything, drawn in
+  the same block-letter font as Omarchy's logo and in your theme's accent
+  color, so it changes when you switch themes.
 
 | Spin one wheel | Edit a wheel | Results |
 | --- | --- | --- |

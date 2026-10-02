@@ -5,6 +5,7 @@
 First release.
 
 - Up to six named wheels, centered in rows of three, with a gentle idle sway.
+- A faint "OmaRandom" backdrop in the font of Omarchy's logo, in the theme's accent color.
 - Theme or Classic slice colors, per-slice colors, and per-option pictures.
 - Click a wheel to spin it large; Save keeps the result and leaves it open.
 - Spin all spins every wheel at once; View results reveals the round card by card.
