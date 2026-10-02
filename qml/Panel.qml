@@ -35,7 +35,7 @@ Item {
 
   readonly property var wheels: store.wheels
   readonly property var results: store.results
-  readonly property var split: Logic.splitLatest(results)
+  readonly property var split: Logic.splitShown(results, store.shown || "")
   property var theme: Logic.CLASSIC.slice()
 
   // ---------- UI state ----------
@@ -57,7 +57,7 @@ Item {
   property int revealRun: 0
 
   property string deleteId: ""
-  property string confirmMode: ""     // "delete" or "clear"
+  property string confirmMode: ""     // "delete" or "history"
 
   function wheelById(id) {
     for (var i = 0; i < wheels.length; i++) if (wheels[i].id === id) return wheels[i]
@@ -107,6 +107,7 @@ Item {
       color: Logic.sliceColor(wheel, index, theme), image: opt.image || "", time: Date.now()
     }
     update(function(d) {
+      d.shown = ""
       d.results.unshift(r)
       if (d.results.length > Logic.MAX_RESULTS) d.results.length = Logic.MAX_RESULTS
     })
@@ -177,6 +178,27 @@ Item {
     tab = "Results"
   }
 
+  // Empty the top of the Results tab. The round stays in the history.
+  function clearTop() {
+    update(function(d) { d.shown = "none" })
+  }
+
+  // Delete every result except the round shown at the top.
+  function clearHistory() {
+    var key = split.key
+    update(function(d) {
+      d.results = d.results.filter(function(r) { return key !== "" && Logic.roundOf(r) === key })
+      d.shown = key ? d.shown : ""
+    })
+  }
+
+  // Bring a round from the history back to the top, revealed again.
+  function showRound(key) {
+    update(function(d) { d.shown = key })
+    revealBatch = key
+    revealRun++
+  }
+
   function finishAllSpins() {
     if (bigWheel.spinning) bigWheel.finishNow()
     for (var i = 0; i < cardRepeater.count; i++) {
@@ -186,7 +208,7 @@ Item {
   }
 
   onTabChanged: {
-    if (tab === "Results" && split.latest.length && split.latest[0].batch === spinAllBatch
+    if (tab === "Results" && split.top.length && split.key === spinAllBatch
         && spinAllBatch !== "" && revealBatch !== spinAllBatch) {
       revealBatch = spinAllBatch
       revealRun++
@@ -320,6 +342,10 @@ Item {
           else if (event.key === Qt.Key_S) { root.saveLanding(); event.accepted = true }
           return
         }
+        if (root.showViewResults && root.tab === "Wheels") {
+          if (event.key === Qt.Key_Escape) { root.showViewResults = false; event.accepted = true; return }
+          if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) { root.viewResults(); event.accepted = true; return }
+        }
         if (event.key === Qt.Key_Escape) { root.requestClose(); event.accepted = true }
         else if (event.key === Qt.Key_Tab || event.key === Qt.Key_Backtab) {
           root.tab = root.tab === "Wheels" ? "Results" : "Wheels"
@@ -403,24 +429,6 @@ Item {
             visible: root.loadState === "ok"
 
             Button {
-              id: viewResultsButton
-              visible: root.tab === "Wheels" && root.showViewResults
-              text: "View results"
-              iconText: "\u{F0E1E}"
-              bordered: true
-              selected: true
-              foreground: root.fg
-              fontFamily: root.fontFamily
-              onClicked: root.viewResults()
-
-              SequentialAnimation on scale {
-                running: viewResultsButton.visible
-                loops: Animation.Infinite
-                NumberAnimation { to: 1.06; duration: 600; easing.type: Easing.InOutQuad }
-                NumberAnimation { to: 1.0; duration: 600; easing.type: Easing.InOutQuad }
-              }
-            }
-            Button {
               visible: root.tab === "Wheels"
               text: "Spin all"
               iconText: "\u{F0450}"
@@ -443,13 +451,22 @@ Item {
               onClicked: root.addWheel()
             }
             Button {
-              visible: root.tab === "Results" && root.results.length > 0
+              visible: root.tab === "Results" && root.split.top.length > 0
               text: "Clear results"
               bordered: true
-              enabled: root.loadState === "ok"
+              tooltipText: "Clear the cards at the top. They stay in the history."
               foreground: root.fg
               fontFamily: root.fontFamily
-              onClicked: root.confirmMode = "clear"
+              onClicked: root.clearTop()
+            }
+            Button {
+              visible: root.tab === "Results" && root.split.history.length > 0
+              text: "Clear history"
+              bordered: true
+              tooltipText: "Delete the history list"
+              foreground: root.fg
+              fontFamily: root.fontFamily
+              onClicked: root.confirmMode = "history"
             }
           }
 
@@ -583,31 +600,100 @@ Item {
                   }
                 }
 
-                Row {
+                // The wheel's name doubles as its edit button.
+                Button {
                   anchors.top: cardWheel.bottom
-                  anchors.topMargin: Style.space(10)
+                  anchors.topMargin: Style.space(12)
                   anchors.horizontalCenter: parent.horizontalCenter
-                  spacing: Style.space(6)
+                  width: Math.min(implicitWidth, card.width)
+                  text: card.modelData.name
+                  iconText: "\u{F03EB}"
+                  bordered: true
+                  enabled: root.spinAllPending === 0
+                  tooltipText: "Edit wheel"
+                  foreground: root.fg
+                  fontFamily: root.fontFamily
+                  fontSize: Style.font.title
+                  horizontalPadding: Style.space(16)
+                  verticalPadding: Style.space(7)
+                  onClicked: root.editWheel(card.modelData.id)
+                }
+              }
+            }
+            // Pops up in the middle when every wheel has landed.
+            Item {
+              id: roundDone
+              anchors.fill: parent
+              visible: root.showViewResults || roundPop.running
+              property real pop: root.showViewResults ? 1 : 0
+              Behavior on pop { NumberAnimation { id: roundPop; duration: 300; easing.type: Easing.OutBack } }
+
+              Rectangle {
+                anchors.fill: parent
+                color: Color.background
+                opacity: 0.55 * Math.min(1, roundDone.pop)
+                MouseArea { anchors.fill: parent; onClicked: root.showViewResults = false }
+              }
+
+              BorderSurface {
+                anchors.centerIn: parent
+                width: roundColumn.implicitWidth + Style.space(64)
+                height: roundColumn.implicitHeight + Style.space(48)
+                scale: 0.6 + 0.4 * roundDone.pop
+                opacity: Math.min(1, roundDone.pop)
+                color: Color.background
+                borderSpec: Border.flat(Color.accent, Math.max(2, Style.normalBorderWidth * 2))
+                radius: Style.cornerRadius
+
+                MouseArea { anchors.fill: parent }
+
+                Column {
+                  id: roundColumn
+                  anchors.centerIn: parent
+                  spacing: Style.space(14)
 
                   Text {
                     textFormat: Text.PlainText
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: Math.min(implicitWidth, card.width - Style.space(70))
-                    elide: Text.ElideRight
-                    text: card.modelData.name
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: "Every wheel has landed"
                     color: root.fg
                     font.family: root.fontFamily
-                    font.pixelSize: Style.font.title
+                    font.pixelSize: Style.font.display
                     font.bold: true
                   }
-                  PanelActionButton {
-                    anchors.verticalCenter: parent.verticalCenter
-                    iconText: "\u{F03EB}"
-                    tooltipText: "Edit wheel"
-                    enabled: root.spinAllPending === 0
-                    foreground: root.fg
-                    fontFamily: root.fontFamily
-                    onClicked: root.editWheel(card.modelData.id)
+                  Row {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    spacing: Style.space(10)
+                    Button {
+                      id: viewResultsButton
+                      text: "View results"
+                      iconText: "\u{F0E1E}"
+                      bordered: true
+                      selected: true
+                      fontSize: Style.font.title
+                      horizontalPadding: Style.space(18)
+                      verticalPadding: Style.space(8)
+                      foreground: root.fg
+                      fontFamily: root.fontFamily
+                      onClicked: root.viewResults()
+
+                      SequentialAnimation on scale {
+                        running: root.showViewResults
+                        loops: Animation.Infinite
+                        NumberAnimation { to: 1.06; duration: 600; easing.type: Easing.InOutQuad }
+                        NumberAnimation { to: 1.0; duration: 600; easing.type: Easing.InOutQuad }
+                      }
+                    }
+                    Button {
+                      text: "Later"
+                      bordered: true
+                      fontSize: Style.font.title
+                      horizontalPadding: Style.space(18)
+                      verticalPadding: Style.space(8)
+                      foreground: root.fg
+                      fontFamily: root.fontFamily
+                      onClicked: root.showViewResults = false
+                    }
                   }
                 }
               }
@@ -646,14 +732,27 @@ Item {
                 spacing: Style.space(14)
 
                 PanelSectionHeader {
-                  text: root.split.latest.length > 1 ? "LATEST ROUND" : "LATEST"
+                  text: root.split.top.length === 1 ? "RESULT" : root.split.top.length > 1 ? "ROUND" : "RESULTS"
                   foreground: root.fg
                   fontFamily: root.fontFamily
                 }
 
+                Text {
+                  textFormat: Text.PlainText
+                  visible: root.split.top.length === 0
+                  width: parent.width
+                  topPadding: Style.space(30)
+                  bottomPadding: Style.space(30)
+                  horizontalAlignment: Text.AlignHCenter
+                  text: "Spin a wheel, or click a result in the history to view it here."
+                  color: root.dim
+                  font.family: root.fontFamily
+                  font.pixelSize: Style.font.title
+                }
+
                 Flow {
                   id: latestFlow
-                  readonly property int perRow: Math.min(3, Math.max(1, root.split.latest.length))
+                  readonly property int perRow: Math.min(3, Math.max(1, root.split.top.length))
                   readonly property real cardWidth: Math.min(Style.space(420),
                     (parent.width - (perRow - 1) * spacing) / perRow)
                   width: perRow * cardWidth + (perRow - 1) * spacing
@@ -668,7 +767,7 @@ Item {
                   }
 
                   Repeater {
-                    model: root.split.latest
+                    model: root.split.top
                     delegate: ResultCard {
                       required property var modelData
                       required property int index
@@ -681,7 +780,7 @@ Item {
                 }
 
                 PanelSectionHeader {
-                  visible: root.split.older.length > 0
+                  visible: root.split.history.length > 0
                   topPadding: Style.space(10)
                   text: "HISTORY"
                   foreground: root.fg
@@ -689,12 +788,30 @@ Item {
                 }
 
                 Repeater {
-                  model: root.split.older
+                  model: root.split.history
                   delegate: Item {
                     id: historyRow
                     required property var modelData
                     width: resultsColumn.width
                     height: Style.space(40)
+
+                    // Click a row to bring its round back to the top.
+                    Rectangle {
+                      anchors.fill: parent
+                      radius: Style.cornerRadius
+                      color: Util.alpha(root.fg, historyMouse.containsMouse ? 0.08 : 0)
+                      Behavior on color { ColorAnimation { duration: 150 } }
+                    }
+                    MouseArea {
+                      id: historyMouse
+                      anchors.fill: parent
+                      hoverEnabled: true
+                      cursorShape: Qt.PointingHandCursor
+                      onClicked: {
+                        root.showRound(Logic.roundOf(historyRow.modelData))
+                        resultsFlick.contentY = 0
+                      }
+                    }
 
                     Rectangle {
                       id: historyDot
@@ -702,7 +819,7 @@ Item {
                       height: width
                       radius: width / 2
                       anchors.left: parent.left
-                      anchors.leftMargin: Style.space(4)
+                      anchors.leftMargin: Style.space(10)
                       anchors.verticalCenter: parent.verticalCenter
                       color: historyRow.modelData.color || Color.accent
                     }
@@ -737,6 +854,7 @@ Item {
                       id: historyTime
                       textFormat: Text.PlainText
                       anchors.right: parent.right
+                      anchors.rightMargin: Style.space(10)
                       anchors.verticalCenter: parent.verticalCenter
                       text: Logic.timeText(historyRow.modelData.time)
                       color: root.dim
@@ -977,16 +1095,15 @@ Item {
         id: confirm
         anchors.fill: parent
         opened: root.confirmMode !== ""
-        message: root.confirmMode === "clear"
-          ? "Clear all " + root.results.length + " results?"
+        message: root.confirmMode === "history"
+          ? "Delete all " + root.split.history.length + " results in the history?"
           : "Delete the wheel “" + (editor.draft ? editor.draft.name : "") + "”?"
-        confirmText: root.confirmMode === "clear" ? "Clear" : "Delete"
+        confirmText: "Delete"
         fontFamily: root.fontFamily
         onCanceled: root.confirmMode = ""
         onConfirmed: {
-          if (root.confirmMode === "clear") {
-            root.update(function(d) { d.results = [] })
-            root.spinAllBatch = ""
+          if (root.confirmMode === "history") {
+            root.clearHistory()
           } else if (root.deleteId) {
             editor.close()
             root.deleteWheel(root.deleteId)
@@ -1007,6 +1124,8 @@ Item {
     property bool faceUp: true
     readonly property bool hasImage: !!result && !!result.image && rcImage.status === Image.Ready
     readonly property real cardHeight: rcFront.implicitHeight
+    // More than three cards make two rows, so each card gets shorter.
+    readonly property bool compact: root.split.top.length > 3
     height: cardHeight
 
     function hideNow() { flip.stop(); faceUp = false; flipAngle = 0; popScale = 0.6; opacity = 0 }
@@ -1058,7 +1177,7 @@ Item {
     BorderSurface {
       id: rcFront
       anchors.fill: parent
-      implicitHeight: Math.max(Style.space(170), rcColumn.implicitHeight + Style.space(44))
+      implicitHeight: Math.max(Style.space(rc.compact ? 120 : 170), rcColumn.implicitHeight + Style.space(rc.compact ? 32 : 44))
       color: Color.background
       borderSpec: Border.flat(rc.result && rc.result.color ? rc.result.color : Color.accent,
         Math.max(2, Style.normalBorderWidth * 2))
@@ -1090,7 +1209,7 @@ Item {
           id: rcImage
           visible: rc.hasImage
           width: parent.width
-          height: visible ? Math.min(width * 0.75, Style.space(260)) : 0
+          height: visible ? Math.min(width * 0.75, Style.space(rc.compact ? 120 : 260)) : 0
           source: rc.result && Logic.isLocalImage(rc.result.image) ? rc.result.image : ""
           sourceSize.width: 840
           sourceSize.height: 840

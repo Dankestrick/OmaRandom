@@ -8,5 +8,8 @@ First release.
 - Theme or Classic slice colors, per-slice colors, and per-option pictures.
 - Click a wheel to spin it large; Save keeps the result and leaves it open.
 - Spin all spins every wheel at once; View results reveals the round card by card.
-- Results history, Clear results, and a plain JSON save file.
+- Results history: click a past result to bring its round back to the top.
+- Clear results (keeps the history) and Clear history (keeps the top).
+- A centered View results popup when Spin all finishes.
+- A plain JSON save file.
 - Plain QML: no commands, no network, no setup step.

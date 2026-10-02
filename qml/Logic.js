@@ -103,7 +103,7 @@ function nextWheelName(wheels) {
 }
 
 function defaults() {
-  return { version: VERSION, wheels: [makeWheel("Wheel 1")], results: [] }
+  return { version: VERSION, wheels: [makeWheel("Wheel 1")], results: [], shown: "" }
 }
 
 function cleanOption(o) {
@@ -167,11 +167,13 @@ function parse(raw) {
     var r = cleanResult(list[j])
     if (r) results.push(r)
   }
-  return { ok: true, data: { version: VERSION, wheels: wheels, results: results } }
+  var shown = typeof obj.shown === "string" ? clip(obj.shown, 64) : ""
+  return { ok: true, data: { version: VERSION, wheels: wheels, results: results, shown: shown } }
 }
 
 function serialize(data) {
-  return JSON.stringify({ version: VERSION, wheels: data.wheels, results: data.results }, null, 2) + "\n"
+  return JSON.stringify({ version: VERSION, wheels: data.wheels, results: data.results,
+                          shown: data.shown || "" }, null, 2) + "\n"
 }
 
 // ---------- Spin math ----------
@@ -219,17 +221,25 @@ function timeText(ms) {
   return Qt.formatDateTime(new Date(ms), "MMM d · h:mm AP")
 }
 
-// Results of the newest batch, oldest first, and everything older.
-function splitLatest(results) {
-  if (!results.length) return { latest: [], older: [] }
-  var batch = results[0].batch
-  var latest = []
-  var older = []
+// The round a result belongs to: its batch, or the result itself.
+function roundOf(r) {
+  return r.batch || r.id
+}
+
+// Splits results into the round shown at the top (oldest first) and the
+// history (everything else, newest first). `shown` is a round key, "" for
+// the newest round, or "none" when the top was cleared.
+function splitShown(results, shown) {
+  if (!results.length) return { top: [], history: [], key: "" }
+  var key = shown === "none" ? "" : (shown || roundOf(results[0]))
+  var top = []
+  var history = []
   for (var i = 0; i < results.length; i++) {
-    if (batch && results[i].batch === batch) latest.push(results[i])
-    else if (!batch && i === 0) latest.push(results[i])
-    else older.push(results[i])
+    if (key && roundOf(results[i]) === key) top.push(results[i])
+    else history.push(results[i])
   }
-  latest.reverse()
-  return { latest: latest, older: older }
+  // A shown round that no longer exists falls back to the newest one.
+  if (!top.length && shown && shown !== "none") return splitShown(results, "")
+  top.reverse()
+  return { top: top, history: history, key: key }
 }

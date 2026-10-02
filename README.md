@@ -26,12 +26,14 @@ Plugin id: `io.github.dankestrick.omarandom`
   (or click the wheel, or press Space) and the winner pops up over it.
   **Save** keeps that result and leaves the wheel open, so a streamer can keep
   it on screen. **Minimize** puts it back with the others.
-- **Spin all.** Spins every wheel at once and saves every result. A
-  **View results** button appears when they land; OmaRandom never switches
-  tabs for you.
+- **Spin all.** Spins every wheel at once and saves every result. When they
+  land, a **View results** button pops up in the middle of the window;
+  OmaRandom never switches tabs for you.
 - **Results.** The newest round shows as cards that flip over one at a time.
-  Older results are listed underneath with their wheel and time. With nothing
-  saved yet, the tab says "Spin a wheel to generate results."
+  Older results are listed underneath in the history; click one to bring its
+  round back to the top. **Clear results** empties the top and keeps the
+  history. **Clear history** deletes the history and keeps the top. With
+  nothing saved yet, the tab says "Spin a wheel to generate results."
 - **Idle sway.** Resting wheels rock gently back and forth.
 
 | Spin one wheel | Edit a wheel | Results |
@@ -64,13 +66,14 @@ Click the wheel icon on the bar to open or close OmaRandom.
 | --- | --- | --- |
 | Window | Tab | Switch between Wheels and Results |
 | Window | Esc | Close OmaRandom |
+| View results popup | Enter / Esc | View results / Later |
 | Large wheel | Space or Enter | Spin |
 | Large wheel | S | Save the result |
 | Large wheel | Esc or M | Minimize |
 | Editor | Esc | Done |
 
-Click the pencil under a wheel to edit it. Changes save as you type. The
-editor also has **Delete wheel**.
+Click a wheel's name under it to edit the wheel. Changes save as you type.
+The editor also has **Delete wheel**.
 
 From a terminal:
 

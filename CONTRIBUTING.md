@@ -68,9 +68,12 @@ omarchy-shell shell hide $id
   "results": [
     { "id": "…", "batch": "…", "wheelId": "…", "wheel": "Dinner", "label": "Tacos",
       "color": "#e53935", "image": "", "time": 1790000000000 }
-  ]
+  ],
+  "shown": ""
 }
 ```
 
-Results are newest first. Every field is checked on load (`Logic.parse`), and
+Results are newest first. `shown` is the round at the top of the Results tab:
+empty for the newest round, a batch id for an older one, or `none` after
+Clear results. Every field is checked on load (`Logic.parse`), and
 a file that fails to parse is never overwritten.
