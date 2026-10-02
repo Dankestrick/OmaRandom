@@ -71,6 +71,7 @@ Click the wheel icon on the bar to open or close OmaRandom.
 | Large wheel | S | Save the result |
 | Large wheel | Esc or M | Minimize |
 | Editor | Esc | Done |
+| Picture browser | Backspace / Esc | Up a folder / Cancel |
 
 Click a wheel's name under it to edit the wheel. Changes save as you type.
 The editor also has **Delete wheel**.
@@ -91,8 +92,9 @@ OmaRandom runs as a normal Omarchy plugin, with your user's permissions.
   (`file://`); anything else is ignored, so a picture can never make the shell
   fetch a URL. All text is shown as plain text.
 - **What it reads.** Its own save file, your theme's `colors.toml` (for the
-  slice colors), and the pictures you choose. Pictures are picked with the
-  standard file picker, and OmaRandom only stores their path.
+  slice colors), the folders you browse when picking a picture, and the
+  pictures you choose. The picture browser is part of OmaRandom, and it only
+  stores each picture's path.
 - **What it writes.** One file: `~/.local/share/omarandom/omarandom.json`,
   with your wheels and up to 500 results. It is saved with an atomic write. If
   that file can't be read, OmaRandom says so and leaves it alone instead of

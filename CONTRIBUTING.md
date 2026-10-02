@@ -9,6 +9,7 @@
 | `qml/Panel.qml` | The window: Wheels and Results tabs, spin view, saving |
 | `qml/Wheel.qml` | One wheel: slices, labels, pictures, pointer, sway and spin |
 | `qml/WheelEditor.qml` | Edit a wheel's name, colors, options and pictures |
+| `qml/ImagePicker.qml` | Picture browser. Qt's FileDialog is not used: it loads the GTK file chooser into the shell process, and a GTK abort there crashes the whole shell |
 | `qml/Logic.js` | Pure helpers: validation, colors, spin math, layout |
 | `scripts/validate.sh` | Manifest, qmllint and safety checks |
 | `docs/screenshots/` | README images |

@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Controls
-import QtQuick.Dialogs
 import qs.Commons
 import qs.Ui
 import "Logic.js" as Logic
@@ -25,7 +24,7 @@ Item {
   property int swatchFor: -1
   property real swatchY: 0
   property int imageFor: -1
-  readonly property bool popupOpen: swatchFor >= 0 || imageDialog.visible
+  readonly property bool popupOpen: swatchFor >= 0 || picker.opened
 
   function openFor(wheel) {
     draft = JSON.parse(JSON.stringify(wheel))
@@ -34,8 +33,15 @@ Item {
     Qt.callLater(function() { nameField.forceActiveFocus() })
   }
 
+  function choosePicture(index) {
+    swatchFor = -1
+    imageFor = index
+    picker.open()
+  }
+
   function close() {
     swatchFor = -1
+    picker.close()
     opened = false
   }
 
@@ -48,6 +54,7 @@ Item {
 
   function handleKey(event) {
     if (!opened) return false
+    if (picker.handleKey(event)) return true
     if (event.key === Qt.Key_Escape) {
       if (swatchFor >= 0) swatchFor = -1
       else root.doneRequested()
@@ -288,10 +295,7 @@ Item {
                 tooltipText: "Add a picture"
                 foreground: root.fg
                 fontFamily: root.fontFamily
-                onClicked: {
-                  root.imageFor = row.index
-                  imageDialog.open()
-                }
+                onClicked: root.choosePicture(row.index)
               }
 
               Image {
@@ -310,10 +314,7 @@ Item {
                 MouseArea {
                   anchors.fill: parent
                   cursorShape: Qt.PointingHandCursor
-                  onClicked: {
-                    root.imageFor = row.index
-                    imageDialog.open()
-                  }
+                  onClicked: root.choosePicture(row.index)
                 }
               }
               Text {
@@ -458,17 +459,22 @@ Item {
     }
   }
 
-  FileDialog {
-    id: imageDialog
-    title: "Choose a picture"
-    nameFilters: ["Pictures (*.png *.jpg *.jpeg *.webp *.gif *.bmp *.svg)"]
-    onAccepted: {
-      var url = String(selectedFile)
+  ImagePicker {
+    id: picker
+    anchors.fill: parent
+    fg: root.fg
+    dim: root.dim
+    fontFamily: root.fontFamily
+    onPicked: function(url) {
       var i = root.imageFor
       root.imageFor = -1
+      picker.close()
       if (i >= 0 && Logic.isLocalImage(url)) root.change(function(d) { if (d.options[i]) d.options[i].image = url })
     }
-    onRejected: root.imageFor = -1
+    onCanceled: {
+      root.imageFor = -1
+      picker.close()
+    }
   }
 
   component SwatchDot: Rectangle {
