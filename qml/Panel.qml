@@ -367,8 +367,8 @@ Item {
         clip: true
 
         readonly property int artColumns: Logic.LOGO.indexOf("\n")
-        // Each copy is a bit under half the window wide.
-        readonly property int artPixelSize: Math.max(5, Math.round(width * 0.42 / (artColumns * 0.6)))
+        // Each copy is about a third of the window wide.
+        readonly property int artPixelSize: Math.max(5, Math.round(width * 0.3 / (artColumns * 0.6)))
         readonly property real diagonal: Math.sqrt(width * width + height * height)
 
         Item {
@@ -384,18 +384,18 @@ Item {
           Column {
             id: tileRows
             anchors.centerIn: parent
-            spacing: backdrop.artPixelSize * 14
+            spacing: backdrop.artPixelSize * 5
 
             Repeater {
-              model: Math.ceil(tiles.height / (backdrop.artPixelSize * 25)) + 1
+              model: Math.ceil(tiles.height / (backdrop.artPixelSize * 16)) + 1
               delegate: Row {
                 required property int index
-                spacing: backdrop.artPixelSize * 18
+                spacing: backdrop.artPixelSize * 8
                 // Every other row shifts half a copy, like bricks.
                 x: index % 2 ? -(backdropArt.width + spacing) / 2 : 0
 
                 Repeater {
-                  model: Math.ceil(tiles.width / (backdrop.width * 0.42)) + 2
+                  model: Math.ceil(tiles.width / (backdrop.width * 0.3)) + 2
                   delegate: Text {
                     textFormat: Text.PlainText
                     text: Logic.LOGO
