@@ -84,6 +84,25 @@ From a terminal:
 omarchy-shell shell toggle io.github.dankestrick.omarandom '{}'
 ```
 
+## Where your wheels and results are saved
+
+Everything OmaRandom keeps is in one file:
+
+```
+~/.local/share/omarandom/omarandom.json
+```
+
+- **Wheels:** each wheel's name, colors, options and picture paths.
+- **Results:** every saved spin, newest first, with the wheel, the option it
+  landed on, its color and picture, the time, and the round it came from. The
+  file keeps the newest 500 results; older ones drop off.
+- **Results tab:** which round is shown at the top.
+
+It saves a moment after each change. Removing the plugin leaves this file, so
+your wheels and history are still there if you install it again. To start
+fresh, delete the `~/.local/share/omarandom` folder. To back up your wheels,
+copy the file.
+
 ## Permissions and safety
 
 OmaRandom runs as a normal Omarchy plugin, with your user's permissions.
