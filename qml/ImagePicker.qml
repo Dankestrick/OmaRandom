@@ -63,7 +63,12 @@ Item {
   Rectangle {
     anchors.fill: parent
     color: Util.alpha(Color.background, 0.75)
-    MouseArea { anchors.fill: parent; onClicked: root.canceled() }
+    MouseArea {
+      anchors.fill: parent
+      // Swallow every button so right-clicks never reach fields underneath.
+      acceptedButtons: Qt.AllButtons
+      onClicked: function(mouse) { if (mouse.button === Qt.LeftButton) root.canceled() }
+    }
   }
 
   BorderSurface {
@@ -74,7 +79,7 @@ Item {
     borderSpec: Border.flat(Color.accent, Style.normalBorderWidth)
     radius: Style.cornerRadius
 
-    MouseArea { anchors.fill: parent }
+    MouseArea { anchors.fill: parent; acceptedButtons: Qt.AllButtons }
 
     Item {
       anchors.fill: parent

@@ -69,7 +69,12 @@ Item {
   Rectangle {
     anchors.fill: parent
     color: Util.alpha(Color.background, 0.75)
-    MouseArea { anchors.fill: parent; onClicked: root.doneRequested() }
+    MouseArea {
+      anchors.fill: parent
+      // Swallow every button so right-clicks never reach fields underneath.
+      acceptedButtons: Qt.AllButtons
+      onClicked: function(mouse) { if (mouse.button === Qt.LeftButton) root.doneRequested() }
+    }
   }
 
   BorderSurface {
@@ -82,7 +87,12 @@ Item {
     radius: Style.cornerRadius
     padding: Style.space(20)
 
-    MouseArea { anchors.fill: parent; onClicked: root.swatchFor = -1 }
+    MouseArea {
+      anchors.fill: parent
+      // Swallow every button so right-clicks never reach fields underneath.
+      acceptedButtons: Qt.AllButtons
+      onClicked: function(mouse) { if (mouse.button === Qt.LeftButton) root.swatchFor = -1 }
+    }
 
     Item {
       id: body
@@ -397,7 +407,7 @@ Item {
         border.color: Color.popups.border
         z: 10
 
-        MouseArea { anchors.fill: parent }
+        MouseArea { anchors.fill: parent; acceptedButtons: Qt.AllButtons }
 
         Column {
           id: swatchColumn

@@ -632,7 +632,12 @@ Item {
                 anchors.fill: parent
                 color: Color.background
                 opacity: 0.55 * Math.min(1, roundDone.pop)
-                MouseArea { anchors.fill: parent; onClicked: root.showViewResults = false }
+                MouseArea {
+                  anchors.fill: parent
+                  // Swallow every button so right-clicks never reach fields underneath.
+                  acceptedButtons: Qt.AllButtons
+                  onClicked: function(mouse) { if (mouse.button === Qt.LeftButton) root.showViewResults = false }
+                }
               }
 
               BorderSurface {
@@ -645,7 +650,7 @@ Item {
                 borderSpec: Border.flat(Color.accent, Math.max(2, Style.normalBorderWidth * 2))
                 radius: Style.cornerRadius
 
-                MouseArea { anchors.fill: parent }
+                MouseArea { anchors.fill: parent; acceptedButtons: Qt.AllButtons }
 
                 Column {
                   id: roundColumn
@@ -913,7 +918,12 @@ Item {
           anchors.fill: parent
           color: Color.background
           opacity: 0.94 * focusLayer.grow
-          MouseArea { anchors.fill: parent; onClicked: root.closeFocus() }
+          MouseArea {
+            anchors.fill: parent
+            // Swallow every button so right-clicks never reach fields underneath.
+            acceptedButtons: Qt.AllButtons
+            onClicked: function(mouse) { if (mouse.button === Qt.LeftButton) root.closeFocus() }
+          }
         }
 
         Text {
@@ -1030,7 +1040,12 @@ Item {
             }
           }
 
-          MouseArea { anchors.fill: parent; onClicked: root.spinFocus() }
+          MouseArea {
+            anchors.fill: parent
+            // Swallow every button so right-clicks never reach fields underneath.
+            acceptedButtons: Qt.AllButtons
+            onClicked: function(mouse) { if (mouse.button === Qt.LeftButton) root.spinFocus() }
+          }
         }
 
         Row {
