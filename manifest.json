@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "io.github.dankestrick.omarandom",
   "name": "OmaRandom",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "Dankestrick",
   "license": "MIT",
   "description": "Spin-the-wheel randomizer for Omarchy: up to six named wheels with colors and pictures, spin one or spin all, and reveal the results.",

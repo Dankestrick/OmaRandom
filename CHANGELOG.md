@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1
+
+- Results history: clicking a past round now also scrolls back to the top. Before, the click logged an error in the shell and the view stayed where it was.
+
 ## 0.1.0
 
 First release.

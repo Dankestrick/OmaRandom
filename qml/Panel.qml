@@ -904,9 +904,12 @@ Item {
                       anchors.fill: parent
                       hoverEnabled: true
                       cursorShape: Qt.PointingHandCursor
+                      // showRound rebuilds this list and deletes this row,
+                      // so read the row and scroll before calling it.
                       onClicked: {
-                        root.showRound(Logic.roundOf(historyRow.modelData))
+                        var key = Logic.roundOf(historyRow.modelData)
                         resultsFlick.contentY = 0
+                        root.showRound(key)
                       }
                     }
 
